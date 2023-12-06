@@ -49,6 +49,7 @@ class Account(AbstractUser):
     phone_number    = models.CharField(max_length=50,blank=True)
     last_login      = models.DateTimeField(auto_now_add=True)
     is_admin        = models.BooleanField(default=False)
+    is_active       = models.BooleanField(default=False)
     
 
     USERNAME_FIELD = 'email'
