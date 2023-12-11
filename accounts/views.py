@@ -11,6 +11,10 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+
+import random
+from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password
 # Create your views here.
 def register(request):
     if request.method == 'POST':
@@ -56,16 +60,56 @@ def login(request):
         password = request.POST['password']
 
         user = auth.authenticate(email=email, password=password ,is_active = True)
-     
+        
+        if user is not None and user.user_type == "Admin":
+            print(user.user_type)
+            return HttpResponse('AdminLogin')
+
         if user is not None:
-            auth.login(request, user)
-            messages.success(request, 'You are now logged in.')
-            return redirect('dashboard')
+            request.session["email"]=email
+            request.session['password'] = password
+            send_otp(request)
+            return render(request,'accounts/otp.html',{"email":email})
+            # auth.login(request, user)
+            # messages.success(request, 'You are now logged in.')
+            # return redirect('dashboard')
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
 
      return render(request, 'accounts/login.html')
+
+
+def send_otp(request):
+    s=""
+    for x in range(0,4):
+        s+=str(random.randint(0,9))
+    request.session["otp"]=s
+    send_mail("otp for sign up",s,'ajayjoy618@gmail.com',[request.session['email']],fail_silently=False)
+    return render(request,'accounts/otp.html')
+
+
+def  otp_verification(request):
+    if  request.method=='POST':
+        otp_=request.POST.get("otp")
+    if otp_ == request.session["otp"]:
+        # encryptedpassword=make_password(request.session['password'])
+        # nameuser=Account(first_name=request.session['first_name'],last_name=request.session['last_name'],email=request.session['email'],password=encryptedpassword)
+        # nameuser.save()
+        # messages.info(request,'signed in successfully...')
+        # Account.is_active=True
+        # return redirect('home')
+        # user = auth.authenticate(email=email, password=password ,is_active = True)
+        email = request.session.get('email')
+        password = request.session.get('password')
+        user = auth.authenticate(email=email, password=password ,is_active = True)
+        auth.login(request, user)
+        messages.success(request, 'You are now logged in.')
+        return redirect('dashboard')
+    else:
+        messages.error(request, 'Invalid OTP')
+        return redirect('login')
+    
 
 @login_required(login_url = 'login')
 def logout(request):

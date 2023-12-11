@@ -1,7 +1,12 @@
 from django import forms
 from .models import Account
+from django.contrib.auth.password_validation import validate_password
+
 
 class RegistrationForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=50) # Required
+    last_name = forms.CharField(max_length=50) # Required
+
     password = forms.CharField(widget=forms.PasswordInput(attrs={
         'placeholder': 'Enter Password',
         'class': 'form-control',
@@ -18,6 +23,8 @@ class RegistrationForm(forms.ModelForm):
         cleaned_data = super(RegistrationForm, self).clean()
         password = cleaned_data.get('password')
         confirm_password = cleaned_data.get('confirm_password')
+
+        validate_password(password)
 
         if password != confirm_password:
             raise forms.ValidationError(
