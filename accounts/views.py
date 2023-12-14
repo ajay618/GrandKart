@@ -148,7 +148,7 @@ def  otp_verification(request):
         user = auth.authenticate(email=email, password=password ,is_active = True)
         auth.login(request, user)
         messages.success(request, 'You are now logged in.')
-        return redirect('checkout')
+        return redirect('cart')
     else:
         messages.error(request, 'Invalid OTP')
         return redirect('login')

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'carts',
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -172,3 +173,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = "ajayjoy618@gmail.com"
 EMAIL_HOST_PASSWORD = 'soyd mhyz covj tety'
 EMAIL_USE_TLS = True
+
+RAZOR_KEY_ID = 'rzp_test_yphpOJF79eOMLy'
+RAZOR_KEY_SECRET = 't7bwqgG5DPmplyytiYKH0ffd'
