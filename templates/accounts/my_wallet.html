@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+{% include 'includes/alerts.html' %}
+<div class="container">
+	<div class="row">
+	{% include 'includes/dashboard_sidebar.html' %}
+    <main class="col-md-9">
+    <div class="container">
+        <h1>Add Money to Wallet</h1>     
+      </div>
+
+      <!-- {% if order_number %}
+      <div class="position-fixed" style="top: 130px; right: 130px;">
+          <a href="{% url 'place_order' %}" class="btn btn-primary">Go Back</a>
+      </div>
+      {% endif %} -->
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="container">
+            {{ form.as_p }}
+            <br>
+            <div class="row">
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success" style="color: white;">Save</button>
+                </div>
+                {% if order_number %}
+                <div class="col-md-2">
+                    <a href="{% url 'place_order' %}" class="btn btn-primary">Go Back</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+    <br>
+    {% if balance %}
+
+    <div class="container align-items-center">
+        <h3><span class="badge badge-primary">Current Balance: ${{ balance }}</span></h3>
+    </div>
+    
+        
+    {% endif %}
+      <br>  
+    <div class="container">
+        <h4>Wallet Transactions</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 33%;">Amount</th>
+                    <th style="width: 33%;">Transaction Type</th>
+                    <th style="width: 33%;">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wallet_transaction in wallet_transactions %}
+                    <tr>
+                        <td>{{ wallet_transaction.amount }}</td>
+                        <td>{{ wallet_transaction.transaction_type|capfirst }}</td>
+                        <td>{{ wallet_transaction.timestamp|date:"Y-m-d" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+</div>
+</div>
+        
+</main>
+
+</section>
+<br><br><br>
+<br><br><br>
+{% endblock %}

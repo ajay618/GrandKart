@@ -12,3 +12,75 @@ ul.thumb li img{
     height: 80px;
     border: 1px solid grey;
 }
+
+.mainImage:hover {
+  transform: scale(1.7); 
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  -ms-transition: all 1s ease;
+  transition: all 1s ease;
+  margin-left:80px;
+  margin-top:80px;
+  image-rendering: pixelated;
+  z-index: 1000;
+}
+
+.content-body{
+  padding: 3rem 5.3rem;
+}
+
+/* Hide Radio button */
+.rate > input{
+  display: none;
+}
+
+.rate{
+  display: inline-block;;
+  border: 0;
+}
+
+.rate > label{
+  float: right;
+}
+
+/* Showing the stars */
+.rate > label:before{
+  display: inline-block;
+  font-size: 1.1rem;
+  font-family: FontAwesome;
+  content: "\f005";
+  margin:0;
+  padding:0.3rem .2rem;
+  cursor: pointer;
+}
+
+/* Half star */
+.rate .half:before{
+  content: "\f089";
+  position: absolute;
+  padding-right: 0;
+}
+
+/* Click and hover */
+input:checked ~ label, label:hover ~ label{
+  color: #ffb503;
+}
+
+/* hover hightlight */
+input:checked + label:hover, input:checked ~ label:hover,input:checked ~ label:hover ~ label,
+label:hover ~ input:checked ~ label{
+  color: #cc9000;
+}
+
+.rating-star i{
+  color: #ffb503 !important;
+}
+
+a.disabled-link {
+  pointer-events: none; /* Prevents the link from being clickable */
+  color: gray; /* Changes the text color to indicate it's disabled */
+  /* You can add more styles to make it visually different */
+  text-decoration: none; /* Remove underlines */
+  cursor: not-allowed; /* Change cursor on hover to indicate non-clickable */
+  /* Optionally, you can adjust opacity or add a custom background color */
+}

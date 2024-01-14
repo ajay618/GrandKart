@@ -1,0 +1,90 @@
+{% extends 'manager/manager_base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Coupon List</h2>
+            <p>See all the coupons here.</p>
+        </div>
+    </div>
+
+    <header class="card-header">
+        <div class="row align-items-center">
+            <form action="{% url 'searchCoupons' %}" class="searchform" method="GET">
+                <div class="input-group">
+                    
+                    {% if keyword %}
+                    <input list="search_terms" type="text" class="form-control" placeholder="Search coupons" name="keyword" value="{{ keyword }}">
+                    <button class="btn btn-light bg" type="submit"> <i class="material-icons md-search"></i></button>
+                    {% else %}
+                    <input list="search_terms" type="text" class="form-control" placeholder="Search coupons" name="keyword">
+                    <button class="btn btn-light bg" type="submit"> <i class="material-icons md-search"></i></button>     
+                    {% endif %}
+                    
+                </div>
+            </form>
+        </div>
+    </header> <!-- card-header end// -->
+<div class="table-responsive">
+    <div class="table-responsive">
+        <table class="table align-middle table-nowrap mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="align-middle" scope="col">Code</th>
+                    <th class="align-middle" scope="col">Discount</th>
+                    <th class="align-middle" scope="col">Valid From</th>
+                    <th class="align-middle" scope="col">Valid To</th>
+                    <th class="align-middle" scope="col">Is Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for coupon in coupons %}
+                         
+                <tr>
+                    <td>{{ coupon.code }} </td>
+                    <td>{{ coupon.discount }}</td>
+                    <td>{{ coupon.valid_from|date:"Y-m-d" }}</td>
+                    <td>{{ coupon.valid_to|date:"Y-m-d" }}</td>
+                    <td> 
+                        {% if coupon.active %}
+                        <span class="badge rounded-pill alert-success">Active</span>
+                        {% else %}
+                        <span class="badge rounded-pill alert-danger">Inactive</span>
+                        {% endif %}
+                            
+                    </td>
+                    <td>
+                        {% if coupon.active %}
+                        <a href="{% url 'editCoupon' coupon.pk %}" class="btn btn-sm font-sm rounded btn-brand">
+                            <i class="material-icons md-edit"></i> Edit
+                        </a>
+                        {% else %}
+                        <a href="{% url 'editCoupon' coupon.pk %}" class="btn btn-sm font-sm rounded btn-brand disabled">
+                            <i class="material-icons md-edit"></i> Edit
+                        </a>
+                        {% endif %}
+                        {% if coupon.active %}
+                        <a href="{% url 'deleteCoupon' coupon.pk %}" class="btn btn-sm font-sm btn-light rounded" onclick="return confirmDelete()">
+                        <i class="material-icons md-delete_forever"></i> Unlist
+                        </a>
+                        {% else %}
+                        <a href="{% url 'deleteCoupon' coupon.pk %}" class="btn btn-sm font-sm btn-light rounded" onclick="return confirmDelete()">
+                        <i class="material-icons md-add"></i> List
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                
+                {% endfor %}
+                    
+            </tbody>
+        </table>
+    </div>
+</div> <!-- table-responsive end// -->
+</section>
+<br><br><br>
+
+{% endblock content %}

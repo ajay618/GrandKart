@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+<br><br><br><br>
+<h2 class="text-center">Your Shopping Cart is Empty</h2>
+<br>
+<div class="text-center">
+<a href="{% url 'store' %}" class="btn btn-primary">Continue Shopping</a>
+</div>
+<br><br><br><br><br><br>
+<br><br><br><br><br><br>
+</div>
+{% endblock content %}

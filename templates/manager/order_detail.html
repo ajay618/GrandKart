@@ -1,0 +1,196 @@
+{% extends 'manager/manager_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order detail</h2>
+            <p>Details for Order ID: {{ order.order_number }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
+                    <span>
+                        <i class="material-icons md-calendar_today"></i> <b>{{order.created_at}}</b>
+                    </span> <br>
+                    <small class="text-muted">Order ID: {{ order.order_number }}</small>
+                </div>
+                <div class="col-lg-6 col-md-6 ms-auto text-md-end">
+                    <!-- <select class="form-select d-inline-block mb-lg-0 mb-15 mw-200"> -->
+                        <form class="d-inline-block" method="POST">
+                            <label for="status">Select status:</label>
+                            <select class="form-select mb-lg-0 mb-15 mw-200" id="status" name="status">
+                                {% for status in statuses %}
+                                    <option value="{{ status.0 }}">{{ status.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    <!-- </select> -->
+                    <!-- <a class="btn btn-primary" href="#">Save</a> -->
+                    <a class="btn btn-primary" type="submit"  onclick="updateStatus()">Save</a>
+                    <!-- <a class="btn btn-secondary print ms-2" href="#"><i class="icon material-icons md-print"></i></a> -->
+                    <!-- {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %} -->
+                </div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="row mb-50 mt-20 order-info-wrap">
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-person"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Customer</h6>
+                            <p class="mb-1">
+                                {{order.full_name}}<br> {{order.email}}
+                            </p>
+                            <a href="#">View profile</a>
+                        </div>
+                    </article>
+                </div> <!-- col// -->
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-local_shipping"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Order info</h6>
+                            <p class="mb-1" >
+                                
+                                {% if order.payment.payment_id %}
+                                Pay method: Paypal
+                                {% else %}
+                                Pay method: COD
+                                {% endif %}
+                      
+                                  <br> 
+                                  <p class="badge rounded-pill alert-success text-success" id="statusUpdate">Status: {{ order.status }}</p>
+                            </p>
+                        </div>
+                    </article>
+                </div> <!-- col// -->
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-place"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Deliver to</h6>
+                            <p class="mb-1">
+                                {{order.full_name}} <br>{{order.full_address}}<br> {{order.city}}, {{order.state}} <br> {{order.country}}
+                            </p>
+                        </div>
+                    </article>
+                </div> <!-- col// -->
+            </div> <!-- row // -->
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="per70 text-left">Products</th>
+                                    <th class="per5 text-center">Qty</th>
+                                    <th class="per25 text-center">Unit Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                              {% for item in order_detail %}
+                                <tr>
+                                    <td>{{item.product.product_name}}
+                                      <p class="text-muted small">
+                                                  {% if item.variations.all %}
+                                                      {% for i in item.variations.all %}
+                                                          {{ i.variation_category | capfirst }} : {{ i.variation_value | capfirst }} <br>
+                                                      {% endfor %}
+                                                  {% endif %}
+                                              </p>
+                                    </td>
+                                    <td class="text-center">{{item.quantity}}</td>
+                                    <td class="text-center">${{item.product_price}} USD</td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2" class="text-right">Sub Total:</th>
+                                    <th class="text-center">${{subtotal}} USD</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" class="text-right">Tax:</th>
+                                    <th class="text-center">${{order.tax}} USD</th>
+                                </tr>
+
+                                <tr>
+                                    <th colspan="2" class="text-right">Grand Total:</th>
+                                    <th class="text-center">${{order.order_total}} USD</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div> <!-- table-responsive// -->
+                </div> <!-- col// -->
+                <div class="col-lg-1"></div>
+                <div class="col-lg-4">
+                    <div class="box shadow-sm bg-light">
+                        <h6 class="mb-15">Payment info</h6>
+                        <p>
+                            <img src="assets/imgs/card-brands/2.png" class="border" height="20"> Master Card **** **** 4768 <br>
+                            Business name: Grand Market LLC <br>
+                            Phone: +1 (800) 555-154-52
+                        </p>
+                    </div>
+                    <!-- <div class="h-25 pt-4">
+                        <div class="mb-3">
+                            <label>Notes</label>
+                            <textarea class="form-control" name="notes" id="notes" placeholder="Type some note"></textarea>
+                        </div>
+                        <button class="btn btn-primary">Save note</button>
+                    </div> -->
+                </div> <!-- col// -->
+            </div>
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+</section> <!-- content-main end// -->
+
+<script>
+    function updateStatus() {
+        var selectedStatus = $('#status').val(); // Get the selected status value from the dropdown
+        var orderId = '{{ order.order_number }}'; // Replace 'order.id' with the actual way to get the order ID in your context
+        
+        // AJAX POST request to update the status
+        $.ajax({
+            type: 'POST',
+            url: '{% url "updateOrderStatus" %}',  // Replace this with your Django URL to handle the status update
+            data: {
+                'status': selectedStatus,
+                'order_id': orderId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}' // Ensure you have CSRF token
+            },
+            success: function(response) {
+                // Handle success, if needed
+                console.log(response)
+                var updatedStatus = $(response).find('#statusUpdate').html();
+                $('#statusUpdate').text(updatedStatus)
+                alert('Status updated successfully.')
+            },
+            error: function(error) {
+                // Handle errors, if any
+                console.error('Error updating status:', error);
+            }
+        });
+    }
+</script>
+
+
+{% endblock content %}

@@ -1,0 +1,117 @@
+{% extends 'manager/manager_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products List</h2>
+            <p>See all the products here.</p>
+        </div>
+        <div>
+            <a href="{% url 'addProduct' %}" class="btn btn-primary btn-sm rounded">Create new</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <form action="{% url 'searchProduct' %}" class="searchform" method="GET">
+                    <div class="input-group">
+                        
+                        {% if keyword %}
+                        <input list="search_terms" type="text" class="form-control" placeholder="Search products" name="keyword" value="{{ keyword }}">
+                        <button class="btn btn-light bg" type="submit"> <i class="material-icons md-search"></i></button>
+                        {% else %}
+                        <input list="search_terms" type="text" class="form-control" placeholder="Search products" name="keyword">
+                        <button class="btn btn-light bg" type="submit"> <i class="material-icons md-search"></i></button>     
+                        {% endif %}
+                        
+                    </div>
+                </form>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            {% if product_count %}
+            <h6>{{ product_count }} items found</h6>
+            <hr>
+            {% endif %}
+
+            <article class="itemlist">
+                {% for product in products %}
+
+                <div class="row align-items-center">
+                        
+                    <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
+                        <a class="itemside" href="#">
+                            <div class="info">
+                                <h6 class="mb-0">{{ product.product_name }}</h6>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-sm-2 col-4 col-price"> <span>${{ product.price }}</span> </div>
+                    <div class="col-lg-2 col-sm-2 col-4 col-status">
+
+                        {% if product.is_available %}
+                        <span class="badge rounded-pill alert-success">Active</span>
+                        {% else %}
+                        <span class="badge rounded-pill alert-danger">Inactive</span>
+                        {% endif %}
+
+                    </div>
+                    <div class="col-lg-1 col-sm-2 col-6 col-date" style="white-space: nowrap;">
+                        <span>{{ product.modified_date|date:"Y-m-d" }}</span>
+                    </div>
+                    
+                    <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
+                        <a href="{% url 'editProduct' product.pk %}" class="btn btn-sm font-sm rounded btn-brand">
+                            <i class="material-icons md-edit"></i> Edit
+                        </a>
+                        {% if product.is_available %}
+                        <a href="{% url 'deleteProduct' product.pk %}" class="btn btn-sm font-sm btn-light rounded" onclick="return confirmDelete()">
+                        <i class="material-icons md-delete_forever"></i> Unlist
+                        </a>
+                        {% else %}
+                        <a href="{% url 'deleteProduct' product.pk %}" class="btn btn-sm font-sm btn-light rounded" onclick="return confirmDelete()">
+                        <i class="material-icons md-add"></i> List
+                        </a>
+                        {% endif %}
+                    </div>
+                    <hr>
+                </div> <!-- row .// -->
+
+                {% endfor %}
+
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <div class="pagination-area mt-30 mb-50">
+        <div class="pagination-area mt-50 mb-70">
+            <nav class="mt-4" aria-label="Page navigation sample">
+                {% if products.has_other_pages %}
+
+                <ul class="pagination">
+
+                    {% for i in products.paginator.page_range %}
+                    {% if products.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                    {% endif %}
+                    {% endfor %}
+
+                </ul>
+                    
+                {% endif %}
+                    
+            </nav>
+        </div>
+    </div>
+</section> <!-- content-main end// -->
+
+<script>
+    function confirmDelete() {
+        return confirm('Are you sure you want to change the status of product?');
+    }
+</script>
+
+{% endblock content %}

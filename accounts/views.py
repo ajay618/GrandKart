@@ -1,6 +1,9 @@
-from django.shortcuts import render ,  redirect 
-from .forms import RegistrationForm
-from .models import Account
+from datetime import datetime
+from django.shortcuts import get_object_or_404, render , redirect
+from decimal import Decimal
+from orders.models import Order, OrderProduct, Wallet, WalletTransaction 
+from .forms import RegistrationForm, UserForm, UserProfileCreateForm, UserProfileForm, WalletForm
+from .models import Account, UserProfile
 from django.contrib import messages , auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -11,6 +14,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+from django.db.models import Q
 
 import random
 from django.core.mail import send_mail
@@ -22,7 +26,8 @@ from carts.models import Cart, CartItem
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
-        if form.is_valid():
+        profile_form = UserProfileForm(request.POST) 
+        if form.is_valid() and profile_form.is_valid():
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
             phone_number = form.cleaned_data['phone_number']
@@ -32,6 +37,23 @@ def register(request):
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
             user.phone_number = phone_number
             user.save()
+
+            # Create a user profile
+            profile = UserProfile()
+            profile.user_id = user.id
+            profile.profile_picture = 'default/default-user.png'
+            address_line_1 = profile_form.cleaned_data['address_line_1']
+            address_line_2 = profile_form.cleaned_data['address_line_2']
+            profile.address_line_1 = address_line_1
+            profile.address_line_2 = address_line_2
+            city = profile_form.cleaned_data['city']
+            state = profile_form.cleaned_data['state']
+            country = profile_form.cleaned_data['country']
+            profile.country = country
+            profile.state = state
+            profile.city = city
+            profile.is_flagged = True
+            profile.save()
 
              # USER ACTIVATION
             current_site = get_current_site(request)
@@ -51,9 +73,11 @@ def register(request):
 
     else:
         form = RegistrationForm()
+        profile_form = UserProfileForm()
         
     context = {
         'form': form,
+        'profile_form':profile_form
     }
     return render(request, 'accounts/register.html',context)
 
@@ -66,9 +90,10 @@ def login(request):
         
         if user is not None and user.user_type == "Admin":
             print(user.user_type)
-            return HttpResponse('AdminLogin')
-
-        if user is not None:
+            auth.login(request, user)
+            messages.success(request, 'You are now logged in.')
+            return redirect('admindashboard')
+        elif user is not None and user.user_type == "User":
             try:
                 cart = Cart.objects.get(cart_id=_cart_id(request))
                 is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
@@ -162,7 +187,15 @@ def logout(request):
 
 @login_required(login_url = 'login')
 def dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    orders = Order.objects.filter(user=request.user).exclude(status='New', is_ordered=False).order_by('-created_at')
+    orders_count = orders.count()
+
+    userprofile = UserProfile.objects.get(user_id=request.user.id, is_flagged = True)
+    context = {
+        'orders_count': orders_count,
+        'userprofile':userprofile
+    }
+    return render(request, 'accounts/dashboard.html',context)
 
 def activate(request,uidb64, token):
     try:
@@ -240,3 +273,144 @@ def resetPassword(request):
             return redirect('resetPassword')
     else:
         return render(request, 'accounts/resetPassword.html')
+    
+
+@login_required(login_url='login')
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user).exclude(status='New', is_ordered=False).order_by('-created_at')
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'accounts/my_orders.html', context)
+
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
+    order = Order.objects.get(order_number=order_id)
+    subtotal = 0
+    for i in order_detail:
+        subtotal += i.product_price * i.quantity
+
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+        'subtotal': subtotal,
+    }
+    return render(request, 'accounts/order_detail.html', context)
+
+
+@login_required(login_url='login')
+def edit_profile(request):
+    userprofile = UserProfile.objects.get(user=request.user, is_flagged = True)
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('edit_profile')
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=userprofile)
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/edit_profile.html', context)
+
+
+@login_required(login_url='login')
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = Account.objects.get(username__exact=request.user.username)
+
+        if new_password == confirm_password:
+            success = user.check_password(current_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                # auth.logout(request)
+                messages.success(request, 'Password updated successfully.')
+                return redirect('change_password')
+            else:
+                messages.error(request, 'Please enter valid current password')
+                return redirect('change_password')
+        else:
+            messages.error(request, 'Password does not match!')
+            return redirect('change_password')
+    return render(request, 'accounts/change_password.html')
+
+@login_required(login_url='login')
+def multiple_address(request):
+    userprofile = UserProfile.objects.filter(user=request.user)
+    # print(userprofile )
+    context = {
+        'userprofiles' : userprofile
+    }
+    return render(request, 'accounts/multiple_address.html',context)
+
+@login_required(login_url='login')
+def multiple_address_update(request,useprofile_id):
+    userprofiles = UserProfile.objects.filter(user=request.user)
+    print(useprofile_id)
+    for userprofile in userprofiles:
+        if userprofile.id == useprofile_id:
+            # print(userprofile.id)
+            userprofile.is_flagged = True
+            userprofile.save()
+        else:
+            userprofile.is_flagged = False
+            userprofile.save()
+    return render(request, 'accounts/multiple_address.html' )
+
+@login_required(login_url='login')
+def add_new_address(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            user_profile = form.save(commit=False)  
+            user_profile.user = request.user 
+            user_profile.save() 
+            messages.success(request, 'New address to the user is added!')
+            return redirect('add_new_address')
+    else:
+        form = UserProfileForm()
+    return render(request, 'accounts/add_new_address.html',{'form': form})
+
+@login_required(login_url='login')
+def orderCancel(request , order_number):
+    order = Order.objects.get(order_number=order_number)
+    print(order.payment.payment_method)
+    if order.payment.payment_method == 'Wallet':
+        print("Wallet refund")
+        wallet = Wallet.objects.get(user=request.user)
+        order_total_decimal = Decimal(str(order.order_total))
+        new_balance = order_total_decimal + wallet.balance
+        wallet.balance = new_balance
+        wallet.save()
+
+        new_transaction = WalletTransaction.objects.create(
+            user_id=request.user.id,  
+            amount=order_total_decimal,  
+            transaction_type='refund',
+            timestamp=datetime.now()  # Set the timestamp
+        )
+
+        new_transaction.save()
+
+        order.status = 'Cancelled'
+        order.is_ordered = False
+        order.save()
+        messages.success(request, 'Money refunded to your wallet!')
+        return redirect('my_orders')
+    else:
+        order.status = 'Cancelled'
+        order.is_ordered = False
+        order.save()
+    return redirect('my_orders')

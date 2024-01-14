@@ -1,0 +1,38 @@
+{% extends 'manager/manager_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>Edit Category</h1>     
+  </div>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container">
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success" style="color: white;">Save</button>
+    </div>
+</form>
+<br><br><br><br>
+{% endblock content %}
+
+<script>
+    document.getElementById('id_image').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const preview = document.createElement('img');
+            preview.src = e.target.result;
+
+            // Replace the existing image preview or append it wherever needed
+            const existingPreview = document.getElementById('image-preview');
+            if (existingPreview) {
+                existingPreview.src = e.target.result;
+            } else {
+                document.body.appendChild(preview);
+            }
+        };
+
+        reader.readAsDataURL(file);
+    });
+</script>

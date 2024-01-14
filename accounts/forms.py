@@ -1,5 +1,6 @@
 from django import forms
-from .models import Account
+from .models import Account, UserProfile
+from orders.models import Wallet
 from django.contrib.auth.password_validation import validate_password
 
 
@@ -39,3 +40,56 @@ class RegistrationForm(forms.ModelForm):
         self.fields['email'].widget.attrs['placeholder'] = 'Enter Email Address'
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = Account
+        fields = ('first_name', 'last_name', 'phone_number')
+
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+class UserProfileForm(forms.ModelForm):
+    profile_picture = forms.ImageField(required=False, error_messages = {'invalid':("Image files only")}, widget=forms.FileInput)
+    class Meta:
+        model = UserProfile
+        fields = ('address_line_1', 'address_line_2', 'city', 'state', 'country', 'profile_picture')
+
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+        self.fields['city'].widget.attrs['placeholder'] = 'City'
+        self.fields['state'].widget.attrs['placeholder'] = 'State'
+        self.fields['country'].widget.attrs['placeholder'] = 'Country'
+        self.fields['address_line_1'].widget.attrs['placeholder'] = 'Address Line1'
+        self.fields['address_line_2'].widget.attrs['placeholder'] = 'Address Line2'
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+class UserProfileCreateForm(forms.ModelForm):
+    profile_picture = forms.ImageField(required=False, error_messages = {'invalid':("Image files only")}, widget=forms.FileInput)
+    class Meta:
+        model = UserProfile
+        fields = ('address_line_1', 'address_line_2', 'city', 'state', 'country', 'profile_picture')
+
+    def __init__(self, *args, **kwargs):
+        super(UserProfileCreateForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+
+# from django import forms
+# from .models import Wallet
+
+class WalletForm(forms.ModelForm):
+    class Meta:
+        model = Wallet
+        fields = ('balance',)
+        widgets = {
+            'balance' : forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Amount to add in Wallet'}), 
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(WalletForm, self).__init__(*args, **kwargs)
+        self.initial['balance'] = None

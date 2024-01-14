@@ -1,0 +1,40 @@
+{% extends 'manager/manager_base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Wallets</h2>
+            <p>See all the user wallets here.</p>
+        </div>
+    </div>
+
+<div class="table-responsive">
+    <div class="table-responsive">
+        <table class="table align-middle table-nowrap mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="align-middle" scope="col">User</th>
+                    <th class="align-middle" scope="col">Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for wallet in wallets %}
+                         
+                <tr>
+                    <td>{{ wallet.user }} </td>
+                    <td>{{ wallet.balance }}</td>
+                </tr>
+                
+                {% endfor %}
+                    
+            </tbody>
+        </table>
+    </div>
+</div> <!-- table-responsive end// -->
+</section>
+<br><br><br>
+
+{% endblock content %}

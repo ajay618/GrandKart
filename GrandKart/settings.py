@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'store',
     'carts',
     'orders',
+    'manager',
 ]
 
 MIDDLEWARE = [
@@ -174,5 +175,7 @@ EMAIL_HOST_USER = "ajayjoy618@gmail.com"
 EMAIL_HOST_PASSWORD = 'soyd mhyz covj tety'
 EMAIL_USE_TLS = True
 
-RAZOR_KEY_ID = 'rzp_test_yphpOJF79eOMLy'
-RAZOR_KEY_SECRET = 't7bwqgG5DPmplyytiYKH0ffd'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+PAYPAL_MODE = 'sandbox'
+PAYPAL_CLIENT_ID = 'Aeljb9gGzdKgOjeGL5kk1Ad6Y9_p6evOPcSswNlNDc2k3om_uJyitvuoKGsDsk1-i9GMlS9FN9zQ2jx'
+PAYPAL_SECRET_ID = 'EHvWR3XD6vz3kFDn0uL27dsbyc16IxvEpeC7ufMZHoLw0yqoe3y8i93gJ25ZtQaxhJnf-I3-zUcBw65a'

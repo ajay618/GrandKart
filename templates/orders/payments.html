@@ -8,6 +8,7 @@
 <div class="row">
 	<aside class="col-lg-8">
         <div class="card">
+            {% include 'includes/alerts.html' %}
             <h5 class="card-header">Billing Address</h5>
             <div class="card-body">
                 <p class="card-text mb-0">{{order.full_name}}</p>
@@ -20,13 +21,6 @@
                 <b>Order Note: </b> {{order.order_note}}
                 {% endif %}
 
-
-            </div>
-        </div>
-        <div class="card">
-            <h5 class="card-header">Payment Method</h5>
-            <div class="card-body">
-                <p class="card-text">PayPal</p>
 
             </div>
         </div>
@@ -87,22 +81,42 @@
 		<div class="card-body">
 			<dl class="dlist-align">
 			  <dt>Total price:</dt>
-			  <dd class="text-right">${{total}}</dd>
+			  <dd class="text-right">${{total|floatformat:"-2"}}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Tax:</dt>
-			  <dd class="text-right"> ${{tax}}</dd>
+			  <dd class="text-right"> ${{tax|floatformat:"-2"}}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Grand Total:</dt>
-			  <dd class="text-right text-dark b"><strong>${{grand_total}}</strong></dd>
+			  <dd class="text-right text-dark b"><strong>${{grand_total|floatformat:"-2"}}</strong></dd>
 			</dl>
 			<hr>
-			<p class="text-center mb-3">
+            
+            {% if not coupon_applied %}
+
+            <form method="post" action="{% url 'coupon_apply' %}">
+                {% csrf_token %}
+                <input type="hidden" name="total_price" value="{{ grand_total }}">
+                <input type="hidden" name="total" value="{{ total }}">
+                <input type="hidden" name="order_number" value="{{ order.order_number }}">
+                <input type="text" name="couponcode" class="form-control" id="coupon" placeholder="Enter coupon code" onkeyup="checkCoupon()">
+                <p class="card-text mb-0" style="display: none;" >{{order.order_number}}</p>
+                <br>
+                <button type="submit" class="btn btn-info btn-block" id="submitBtn" disabled>Apply Coupon Code</button>
+            </form>
+            <br>
+                
+            {% endif %}
+            <p class="text-center mb-3">
 				<img src="{% static './images/misc/payments.png' %}" height="26">
-			</p>
-            <a href="{% url 'cash_on_delivery' %}" class="btn btn-success btn-block"> Cash on Delivery </a>
-			<a href="#" class="btn btn-primary btn-block"> Pay with Razorpay </a>
+            </p>
+            <a href="{% url 'wallet_pay' %}" class="btn btn-info btn-block"> Pay via Wallet </a>
+            <br>
+            <a href="{% url 'cash_on_delivery' %}" class="btn btn-success btn-block" onclick="return confirm('Are you sure you want Cash on Delivery?')"> Cash on Delivery </a>
+			<!-- <a href="#" class="btn btn-primary btn-block"> Pay with Razorpay </a> -->
+            <br>
+            <div id="paypal-button-container"></div>
 		</div> <!-- card-body.// -->
 		</div> <!-- card.// -->
 
@@ -115,9 +129,93 @@
 </div> <!-- container .//  -->
 </section>
 <br><br><br><br><br>
-{% endblock content %}
+<script>
 
-{% block 'scripts' %}
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-{% endblock 'scripts' %}
-    
+	function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+	var amount = "{{ grand_total }}"
+	var url = "{% url 'payments' %}"
+	var csrftoken = getCookie('csrftoken');
+	var orderID = "{{order.order_number}}"
+	var payment_method = 'PayPal'
+	var redirect_url = "{% url 'order_complete' %}"
+	// Render the PayPal button into #paypal-button-container
+	paypal.Buttons({
+
+		style: {
+			color: 'blue',
+			shape: 'rect',
+			label: 'pay',
+			height: 40
+		},
+
+		// Set up the transaction
+		createOrder: function(data, actions) {
+			return actions.order.create({
+				purchase_units: [{
+					amount: {
+						value: amount,
+					}
+				}]
+			});
+		},
+
+		// Finalize the transaction
+		onApprove: function(data, actions) {
+			return actions.order.capture().then(function(details) {
+				// Show a success message to the buyer
+				console.log(details);
+				sendData();
+				function sendData(){
+					fetch(url, {
+						method : "POST",
+						headers: {
+							"Content-type": "application/json",
+							"X-CSRFToken": csrftoken,
+						},
+						body: JSON.stringify({
+							orderID: orderID,
+							transID: details.id,
+							payment_method: payment_method,
+							status: details.status,
+						}),
+					})
+				  .then((response) => response.json())
+				  .then((data) => {
+						window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
+					});
+				}
+			});
+		}
+
+
+	}).render('#paypal-button-container');
+
+    function checkCoupon() {
+        var couponInput = document.getElementById('coupon');
+        var submitBtn = document.getElementById('submitBtn');
+
+        // Check if the coupon input value is empty
+        if (couponInput.value.trim() === '') {
+            submitBtn.disabled = true; // Disable the submit button
+        } else {
+            submitBtn.disabled = false; // Enable the submit button
+        }
+    }
+
+</script>
+{% endblock content %}

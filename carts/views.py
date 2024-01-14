@@ -1,7 +1,9 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render , get_object_or_404
+from accounts.models import UserProfile
 from carts.models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
+from orders.forms import OrderForm
 from store.models import Product,Variation
 from django.contrib.auth.decorators import login_required
 
@@ -63,8 +65,8 @@ def add_cart(request, product_id):
                 cart_item.variations.add(*product_variation)
             cart_item.save()
         return redirect('cart')
-    # If the user is not authenticated
-    else :
+     # If the user is not authenticated
+    else:
         product_variation = []
         if request.method == 'POST':
             for item in request.POST:
@@ -83,15 +85,15 @@ def add_cart(request, product_id):
         except Cart.DoesNotExist:
             cart = Cart.objects.create(
                 cart_id = _cart_id(request)
-                )
+            )
         cart.save()
 
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
         if is_cart_item_exists:
             cart_item = CartItem.objects.filter(product=product, cart=cart)
-                # existing_variations -> database
-                # current variation -> product_variation
-                # item_id -> database
+            # existing_variations -> database
+            # current variation -> product_variation
+            # item_id -> database
             ex_var_list = []
             id = []
             for item in cart_item:
@@ -102,7 +104,7 @@ def add_cart(request, product_id):
             print(ex_var_list)
 
             if product_variation in ex_var_list:
-                    # increase the cart item quantity
+                # increase the cart item quantity
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
@@ -117,9 +119,9 @@ def add_cart(request, product_id):
                 item.save()
         else:
             cart_item = CartItem.objects.create(
-                    product = product,
-                    quantity = 1,
-                    cart = cart,
+                product = product,
+                quantity = 1,
+                cart = cart,
             )
             if len(product_variation) > 0:
                 cart_item.variations.clear()
@@ -186,7 +188,7 @@ def checkout(request , total=0, quantity=0, cart_items=None):
         tax = 0
         grand_total = 0
         if request.user.is_authenticated:
-            cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+            cart_items = CartItem.objects.filter(user=request.user, is_active=True)    
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
@@ -197,11 +199,38 @@ def checkout(request , total=0, quantity=0, cart_items=None):
         grand_total = total + tax
     except ObjectDoesNotExist:
         pass #just ignore
+    if request.user.is_authenticated:
+     my_user_instance = UserProfile.objects.get(user_id=request.user.id,is_flagged=True)
+    #  print(my_user_instance)
+     related_account = my_user_instance.user
+     first_name = related_account.first_name
+     last_name = related_account.last_name
+     phone = related_account.phone_number
+     email = related_account.email
+     address_line1  = my_user_instance.address_line_1
+     address_line2  = my_user_instance.address_line_2
+     city  = my_user_instance.city
+     state  = my_user_instance.state
+     country  = my_user_instance.country
+    
     context = {
         'total': total,
         'quantity': quantity,
         'cart_items': cart_items,
         'tax'       : tax,
-        'grand_total': grand_total
+        'grand_total': grand_total,
+        'first_name' : first_name,
+        'last_name' : last_name,
+        'phone' : phone,
+        'email' : email ,
+        'address_line1' : address_line1,
+        'address_line2' : address_line2,
+        'city' : city,
+        'state' : state,
+        'country' : country,
+
     }
     return render(request , 'store/checkout.html',context)
+
+def empty_cart(request):
+    return render(request,'store/cart_empty.html')

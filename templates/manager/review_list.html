@@ -1,0 +1,56 @@
+{% extends 'manager/manager_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="table-responsive">
+    <div class="table-responsive">
+        <table class="table align-middle table-nowrap mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="align-middle" scope="col">Product</th>
+                    <th class="align-middle" scope="col">User</th>
+                    <th class="align-middle" scope="col">Review</th>
+                    <th class="align-middle" scope="col">Rating</th>
+                    <th class="align-middle" scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for review in reviews %}
+                         
+                <tr>
+                    <td>{{ review.product }} </td>
+                    <td>{{ review.user }}</td>
+                    <td>{{ review.review }}</td>
+                    <td>{{ review.rating }}</td>
+                    <td> 
+                        {% if review.status %}
+                        <span class="badge rounded-pill alert-success">Active</span>
+                        {% else %}
+                        <span class="badge rounded-pill alert-danger">Inactive</span>
+                        {% endif %}
+                            
+                    </td>
+                    <td>
+                        {% if review.status %}
+                        <a href="{% url 'editreviewList' review.pk %}" class="btn btn-sm font-sm btn-light rounded">
+                        <i class="material-icons md-delete_forever"></i> Change Status
+                        </a>
+                        {% else %}
+                        <a href="{% url 'editreviewList' review.pk %}" class="btn btn-sm font-sm btn-light rounded">
+                        <i class="material-icons md-add"></i> Change Status
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                
+                {% endfor %}
+                    
+            </tbody>
+        </table>
+    </div>
+</div> <!-- table-responsive end// -->
+<br><br><br>
+
+{% endblock content %}

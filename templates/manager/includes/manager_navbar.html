@@ -1,0 +1,42 @@
+{% load static %}
+
+<main class="main-wrap">
+
+<nav class="navbar navbar-expand-sm navbar-dark bg-blue">
+    <div class="container-fluid">
+      <a class="navbar-brand" ></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mynavbar">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)"></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)"></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)"></a>
+          </li>
+        </ul>
+        {% if user.id is None %}
+                <div class="widget-header">
+                  <small class="title text-muted">Welcome guest!</small>
+                  <div>
+                    <a href="{% url 'dashboard' %}">Sign in</a> <span class="dark-transp"> | </span>
+                    <a href="{% url 'register' %}"> Register</a> <br>
+                  </div>
+                </div>
+                {% else %}
+                <div class="widget-header">
+                  <small class="title text-muted">Welcome {{user.first_name}}!</small>
+                  <div>
+                    <a href="{% url 'admindashboard' %}">Dashboard</a> <span class="dark-transp"> | </span>
+                    <a href="{% url 'logout' %}"> Logout</a>
+                  </div>
+                </div>
+            {% endif %}
+      </div>
+    </div>
+  </nav>

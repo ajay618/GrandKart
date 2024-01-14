@@ -1,8 +1,7 @@
 from django.db import models
 from accounts.models import Account
 from store.models import Product, Variation
-
-
+from django.utils import timezone
 
 class Payment(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -44,6 +43,7 @@ class Order(models.Model):
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    coupon_applied = models.BooleanField(default=False)
 
 
     def full_name(self):
@@ -70,3 +70,30 @@ class OrderProduct(models.Model):
 
     def __str__(self):
         return self.product.product_name
+    
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount = models.DecimalField(max_digits=10, decimal_places=2)
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_to = models.DateTimeField()
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.code
+    
+class Wallet(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.user.username}'s Wallet"
+
+class WalletTransaction(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=10)  # 'credit' or 'debit' or 'refund'
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{str(self.amount)}"

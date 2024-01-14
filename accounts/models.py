@@ -1,5 +1,9 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser,BaseUserManager
+
+def default_image_path():
+    return 'default/default-user.png'
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, first_name, last_name, username, email, password=None):
@@ -66,9 +70,11 @@ class Account(AbstractUser):
     def has_module_perms(self, add_label):
         return True
     
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
 
 class AccountDetails(models.Model):
-    type = models.OneToOneField('Account',on_delete=models.CASCADE)
+    type = models.ManyToManyField(Account)
     extra_info = models.CharField(max_length=200)
 
     class Meta:
@@ -77,3 +83,21 @@ class AccountDetails(models.Model):
 
     def __str__(self):
         return self.extra_info
+    
+class UserProfile(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    address_line_1 = models.CharField(blank=True, max_length=100)
+    address_line_2 = models.CharField(blank=True, max_length=100)
+    profile_picture = models.ImageField(blank=True, upload_to='userprofile' , default=default_image_path)
+    city = models.CharField(blank=True, max_length=20)
+    state = models.CharField(blank=True, max_length=20)
+    country = models.CharField(blank=True, max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_flagged = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.first_name
+
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'
+    

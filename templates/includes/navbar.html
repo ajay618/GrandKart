@@ -1,5 +1,5 @@
 {% load static %}
-
+<script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 <header class="section-header">
 
     <section class="header-main border-bottom">
@@ -50,21 +50,19 @@
                           <small class="title text-muted">Welcome {{user.first_name}}!</small>
                           <div>
                             <a href="{% url 'dashboard' %}">Dashboard</a> <span class="dark-transp"> | </span>
-                            <a href="{% url 'logout' %}"> Logout</a>
+                            <a href="{% url 'logout' %}"> Logout</a> | </span>
+                            <a href="{% url 'my_wallet' %}" data-original-title="wallet" data-toggle="tooltip"><i class='fas fa-wallet' style='font-size:23px'></i></a>
                           </div>
+                          <!-- <i class="bi bi-wallet"></i> -->
                         </div>
                         {% endif %}
                         <a href="{% url 'cart' %}" class="widget-header pl-3 ml-3">
                             <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
-                            <span class="badge badge-pill badge-danger notify">{{ cart_count }}</span>
+                            <span id= "navbarCartQuantity" class="badge badge-pill badge-danger notify">{{ cart_count }}</span>
                         </a>
                     </div> <!-- widgets-wrap.// -->
                 </div> <!-- col.// -->
     </div> <!-- row.// -->
         </div> <!-- container.// -->
-    </section> <!-- header-main .// -->
-    
-    
-    
-    
+    </section> <!-- header-main .// -->   
     </header> <!-- section-header.// -->

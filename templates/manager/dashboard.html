@@ -1,0 +1,151 @@
+{% extends 'manager/manager_base.html' %}
+{% load static %}
+
+{% block content %}
+       
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Dashboard </h2>
+                    <p>Whole data about your business here</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Revenue</h6>
+                                <span>${{ total_sum }}</span>
+                                <span class="text-sm">
+                                    Including taxes!
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Orders</h6> 
+                                <span>{{ total_order }}</span>
+                                <span class="text-sm">
+                                    New,accepted,completed & canceled
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Products</h6> 
+                                <span>{{ total_products }}</span>
+                                <span class="text-sm">
+                                    In {{total_categories}} Categories
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            <div class="card mb-4">
+                <header class="card-header">
+                    <h4 class="card-title">All orders</h4>
+                    <div class="row align-items-center">
+                        <form action="{% url 'searchOrder' %}" class="searchform" method="GET">
+                            <div class="input-group">
+                                
+                                {% if keyword %}
+                                <input list="search_terms" type="text" class="form-control" placeholder="Search orders" name="keyword" value="{{ keyword }}">
+                                <button class="btn btn-light bg" type="submit"> <i class="material-icons md-search"></i></button>
+                                {% else %}
+                                <input list="search_terms" type="text" class="form-control" placeholder="Search orders" name="keyword">
+                                <button class="btn btn-light bg" type="submit"> <i class="material-icons md-search"></i></button>
+                                {% endif %}
+                                        
+                            </div>
+                        </form>
+                    </div>
+                    </div>
+                </header>
+                <div class="card-body">
+                    
+                    {% if order_count %}
+                        <h6>{{ order_count }} items found</h6>
+                        <hr>
+                    {% endif %}
+                        
+                    <div class="table-responsive">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-nowrap mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="align-middle" scope="col">Order ID</th>
+                                        <th class="align-middle" scope="col">Billing Name</th>
+                                        <th class="align-middle" scope="col">Date</th>
+                                        <th class="align-middle" scope="col">Total</th>
+                                        <th class="align-middle" scope="col">Status</th>
+                                        <th class="align-middle" scope="col">Email</th>
+                                        <th class="align-middle" scope="col">View Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    {% for order in orders %}
+                                             
+                                    <tr>
+                                        <td>{{ order.order_number }} </td>
+                                        <td>{{ order.first_name }}</td>
+                                        <td>
+                                            {{ order.created_at }}
+                                        </td>
+                                        <td>
+                                            {{ order.order_total }}
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-pill badge-soft-success">{{ order.status }}</span>
+                                        </td>
+                                        <td>
+                                            <i class="material-icons md-payment font-xxl text-muted mr-5"></i> {{ order.email }}                                       </td>
+                                        <td>
+
+                                            <a href="{% url 'orderDetail' order.order_number %}" class="btn btn-xs">View details</a>
+                                        </td>
+                                    </tr>
+                                    
+                                    {% endfor %}
+                                        
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> <!-- table-responsive end// -->
+                </div>
+            </div>
+            <div class="pagination-area mt-50 mb-70">
+                <nav class="mt-4" aria-label="Page navigation sample">
+                    {% if orders.has_other_pages %}
+
+                    <ul class="pagination">
+
+                        {% for i in orders.paginator.page_range %}
+                        {% if orders.number == i %}
+                        <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+                        {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                        {% endif %}
+                        {% endfor %}
+
+                    </ul>
+                        
+                    {% endif %}
+                        
+                </nav>
+            </div>
+        </section> <!-- content-main end// -->
+
+{% endblock content %}

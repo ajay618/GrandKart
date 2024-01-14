@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+    {% include 'includes/alerts.html' %}
+
+ <div class="container">
+    <div class="row">
+        {% include 'includes/dashboard_sidebar.html' %}
+        <main class="col-md-9">
+            <article class="card">
+            <header class="card-header">
+                <strong class="d-inline-block mr-3">Your addresses</strong>
+    
+            </header>
+            <div class="card-body">
+                <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th scope="col">Address Line1</th>
+                          <th scope="col">Address Line2</th>
+                          <th scope="col">State</th>
+                          <th scope="col">Country</th>
+                          <th scope="col">Prefill Address</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                           
+                        {% for userprofile in userprofiles  %}
+                                 
+                        <tr id="{{ userprofile.id }}">
+                          <th scope="row"><a id="myLink_{{ userprofile.id }}" class="{% if not userprofile.is_flagged %} disabled-link {% endif %}" href="{% url 'edit_profile' %}" >{{userprofile.address_line_1}}</a>
+                          <!-- <td>{{userprofile.address_line_1}}</td> -->
+                          <td>{{userprofile.address_line_2}}</td>
+                          <td>{{userprofile.state}}</td>
+                          <td>{{userprofile.country}}</td>
+                          <td class="text-center">
+                          <input class="form-check-input" type="checkbox" name="userprofile_checkbox" data-useprofile_id="{{ userprofile.id }}" data-userprofile-id-url="{% url 'multiple_address_update' userprofile.id %}" {% if userprofile.is_flagged %}checked{% endif %}>
+                          </td>
+                        </tr>
+
+                        {% endfor %}
+                               
+                      </tbody>
+                    </table>
+                </div>
+    
+                </div> <!-- row.// -->
+            </div> <!-- card-body .// -->
+    
+            </article> <!-- order-group.// -->
+        </main>
+    </div>
+</div>
+<script>
+
+$(document).ready(function() {
+    
+    $('input[name="userprofile_checkbox"]').on('change', function() {
+        console.log("hey")
+        const userProfileId = $(this).data('useprofile_id');
+        const isChecked = $(this).prop('checked');
+        console.log(userProfileId)
+         // Uncheck other checkboxes
+         $('input[name="userprofile_checkbox"]').not(this).prop('checked', false);
+
+        // Disable all links initially
+        $('.disabled-link').addClass('disabled');
+
+        if (isChecked) {
+            // Enable the link in the checked row
+            $('#myLink_' + userProfileId).removeClass('disabled-link disabled');
+
+            // Disable links in other rows
+            $('input[name="userprofile_checkbox"]').not(this).each(function() {
+                const otherId = $(this).data('userprofile-id');
+                $('#myLink_' + otherId).addClass('disabled-link disabled');
+            });
+        }
+
+        updateAddressURL = $(this).data('userprofile-id-url');
+
+        $.ajax({
+            url: updateAddressURL,
+            type: 'POST',
+            data: {
+                is_flagged: isChecked ? 1 : 0,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function(response) {
+                // Handle success response if needed
+                location.reload();
+
+            },
+            error: function(error) {
+                // Handle error response if needed
+                console.error(error);
+            }
+        });
+    });
+});
+
+
+</script>
+
+
+</section>
+
+
+{% endblock %}
