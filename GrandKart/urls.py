@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('secureadmin/', admin.site.urls),
     path('',views.home,name='home'),
     path('my_wallet/',views.my_wallet,name="my_wallet"),
     path('store/', include('store.urls')),
