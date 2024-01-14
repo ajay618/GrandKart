@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
+    path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
     path('secureadmin/', admin.site.urls),
     path('',views.home,name='home'),
     path('my_wallet/',views.my_wallet,name="my_wallet"),
