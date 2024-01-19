@@ -22,10 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
-
+SECRET_KEY='django-insecure-j9pq)sekts^s8jb1v*owql^sfmq+-qube20n&q6f7r&sk=t0)y'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG' ,default=True ,cast=bool)
+DEBUG=True
 
 ALLOWED_HOSTS = []
 
@@ -178,13 +177,14 @@ MESSAGE_TAGS = {
 
 # SMTP configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_PORT=587
+EMAIL_HOST_USER='ajayjoy618@gmail.com'
+EMAIL_HOST_PASSWORD='soyd mhyz covj tety'
+EMAIL_USE_TLS=True
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 PAYPAL_MODE = 'sandbox'
-PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
-PAYPAL_SECRET_ID = config('PAYPAL_SECRET_ID')
+
+PAYPAL_CLIENT_ID='Aeljb9gGzdKgOjeGL5kk1Ad6Y9_p6evOPcSswNlNDc2k3om_uJyitvuoKGsDsk1-i9GMlS9FN9zQ2jx'
+PAYPAL_SECRET_ID='EHvWR3XD6vz3kFDn0uL27dsbyc16IxvEpeC7ufMZHoLw0yqoe3y8i93gJ25ZtQaxhJnf-I3-zUcBw65a'
