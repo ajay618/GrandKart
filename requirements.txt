@@ -10,6 +10,8 @@ django-password-validators==1.7.3
 django-session-timeout==0.1.0
 idna==3.6
 pillow==10.2.0
+psycopg2==2.9.9
+psycopg2-binary==2.9.9
 python-decouple==3.8
 python-ipware==2.0.1
 pytz==2023.3.post1
