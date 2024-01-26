@@ -33,5 +33,5 @@ urlpatterns = [
     path('wallet_transactions/',views.walletTransactions,name="walletTransactions"),
     path('review_list/',views.reviewList,name="reviewList"),
     path('edit_review_list/<int:pk>/',views.editreviewList,name="editreviewList"),
-    path('accounts/login/', accounts.views.login, name='login'),
+    
 ]
