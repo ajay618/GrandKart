@@ -9,9 +9,11 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
+@login_required(login_url = 'login')
 def admindashboard(request):
     sum_of_payment = Payment.objects.aggregate(total=Sum('amount_paid'))
     total_sum = sum_of_payment['total']
